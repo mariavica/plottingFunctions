@@ -1,3 +1,99 @@
+##########
+
+
+
+correctAB <- function (x) {
+  
+  chrs <- unique(x[,1])
+  
+  for (i in 1:length(chrs)) {
+    sel <- which(x[,1]==chrs[i])
+    
+    for (j in 5:ncol(x)) {
+      
+      if (cor(x[sel,4],x[sel,j]) < 0 ) {
+        x[sel,j]<- -c(x[sel,j])
+      }
+      
+      
+    }
+    
+    
+  }
+  
+  return(x)
+  
+}
+
+
+
+
+selectAB <- function (x.list, ref.at) {
+  
+  x2.list<-list()
+  
+  for (zz in 1:length(x.list)) {
+    
+    x<-x.list[[zz]]
+    x2 <- x[,1:4]
+    x2[,4]<-0
+    
+    chrs <- unique(x[,1])
+    
+    id.x <- paste(x[,1],x[,2],x[,3],sep=':')
+    id.ref <- paste(ref.at[,1],ref.at[,2],ref.at[,3],sep=':')
+    
+    rownames(x)<-id.x
+    rownames(x2)<-id.x
+    rownames(ref.at)<-id.ref
+    
+    for (i in 1:length(chrs)) {
+      
+      cat(paste(chrs[i],'\n'))
+      
+      id.x.sel <- id.x[which(x[,1]==chrs[i])]
+      id.ref.sel <- id.ref[which(ref.at[,1]==chrs[i])]
+      
+      
+      sel <- intersect(id.x.sel, id.ref.sel)
+      
+      if (length(sel)<=0) {warning('No common IDs, skipping chromosome...'); next}
+      
+      # correlation
+      
+      cor.1 <- cor(x[sel,4],ref.at[sel,4])
+      cor.2 <- cor(x[sel,5],ref.at[sel,4])
+      
+      cors <- c(cor.1,cor.2)
+      # pick the maximum
+      sel.cor <-which(abs(cors)==max(abs(cors)))
+      
+      x2[sel,4] <- x[sel,sel.cor+3]*sign(cors[sel.cor])
+      
+
+			cat(paste('  Correlation with AT content: ', round(cors[1],2),', ', round(cors[2],2),'\n' ,sep=''))
+			cat(paste('  Selected column: EV', sel.cor,'\n',sep=''))
+			cat(paste('  Invert sign: ', sign(cors[sel.cor])==(-1),'\n',sep=''))
+			cat('\n')
+
+		}
+
+		x2.list[[zz]]<-x2
+
+	}
+
+	return(x2.list)
+
+}
+
+
+
+
+
+
+
+
+
 
 
 plotTwoTrends <- function(x1, x2, x = NA, 
