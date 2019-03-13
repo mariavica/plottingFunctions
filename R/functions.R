@@ -7,7 +7,7 @@ plotTwoTrends <- function(x1, x2, x = NA,
                           loess = FALSE, sp = 0.5, res.x = 1000, 
                           plot.sd = TRUE, error.plot = 0.95,
                           xlab = NA, ylab1 = NA, ylab2 = NA, omit.lab2 = FALSE,
-                          main = NULL, pos.leg='topright', name.1=NULL, name.2,NULL) {
+                          main = NULL, pos.leg='topright', name.1=NULL, name.2=NULL) {
 
 
   if (ncol(x1)!=ncol(x2)) {
@@ -186,7 +186,7 @@ plotTwoTrends <- function(x1, x2, x = NA,
   if(is.null(name.2)) deparse(substitute(x2))
   
 
-  legend(pos.leg, c(name.1,name.2), col=c(col1,col2), lwd=2)
+  legend(pos.leg, c(name.1,name.2), col=c(col1,col2), lwd=2, bty = "n")
   
   
   
@@ -200,7 +200,7 @@ plotTwoTrends <- function(x1, x2, x = NA,
   
  # plotTwoTrends(x1 = a, x2 = b , loess = TRUE , expand = 0.75)
   
-  plotTwoTrends(x1 = a, x2 = b , loess = TRUE , expand = 0.75, main = 'Juju')
+  plotTwoTrends(x1 = a, x2 = b , loess = TRUE , expand = 0.75, main = 'Juju', name.1 = 'a', name.2 = 'b')
   
 
 
@@ -213,7 +213,14 @@ plotTwoTrends <- function(x1, x2, x = NA,
 
 
 
-
+  library(h5)
+  testmat <- matrix(rpois(1000000,lambda=50), ncol = 1000, nrow=1000)
+  # Create HDF5 File
+  file <- h5file("test.h5")
+  # Save matrix to file in group 'testgroup' and datasetname 'testmat'
+  file["testgroup", "testmat"] <- testmat
+  # Close file
+  h5close(file)
   
   
   
