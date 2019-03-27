@@ -1,4 +1,11 @@
 ##########
+get.chr <- function (x, sep=sep, pos=1) {
+  
+   strsplit(x,split=sep)[[1]][pos]
+  
+}
+
+
 
 
 
