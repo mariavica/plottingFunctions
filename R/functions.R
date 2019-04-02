@@ -1,4 +1,83 @@
 ##########
+
+#####
+
+ref <- data.frame(chr=c('chr1'),start=c(300,600), end=c(400,700))
+
+map <- data.frame(chr=rep('chr1',10),start=c(100,200,300,400,500,600,700,800,900,1000),
+                  end=c(100,200,300,400,500,600,700,800,900,1000)+99,
+                  V1=rnorm(10),
+                  V2=rnorm(10,mean = 2))
+
+
+
+map.plot <- function ( ref, map , grouping, expand=5 ) {
+  
+  # check columns
+  ref[,1]<-as.character(ref[,1])
+  map[,1]<-as.character(map[,1])
+  
+  ref[,2]<-as.numeric(ref[,2])
+  map[,2]<-as.numeric(map[,2])
+  
+  ref[,3]<-as.numeric(ref[,3])
+  map[,3]<-as.numeric(map[,3])
+  
+  colnames(map)[c(1,2)]<-c('chr','start')
+  
+  
+  #sort map
+  map <- map[with(map, order(chr, start)),]
+  
+  select.all <- matrix(0, ncol=4:ncol(map), nrow=expand*2+1)
+
+  
+  
+  for (i in 1:nrow(ref)) {
+
+    # find 
+    sel <- which(map[,1]==ref[i,1])
+    
+    sel.more <- which(map[sel,2] <= ref[i,2] &  map[sel,3] >= ref[i,2] )  # identify the right thing
+    
+    select.all <- select.all + map[ sel[ c( max(1,sel.more-expand) : min(length(sel),sel.more+expand  ) )   ] , 4:ncol(map) ]
+    
+    #coordinates <- map[ sel[ c( max(1,sel.more-expand) : min(length(sel),sel.more+expand  ) )   ] , 1:3 ]
+    
+  }
+  
+  select.all <- select.all/nrow(ref)
+  
+  
+  plot (  1:(expand*2+1), select.all[,1], type='l', ylim=c(min(select.all),max(select.all)  ),
+          #main=paste(coordinates[1,1], coordinates[1,2], coordinates[nrow(coordinates),3], sep=':'),
+          ylab='signal',xlab='position',xaxt='n')
+  axis(1, at=1:nrow(select.all), apply(coordinates[,2:3],1,mean), las=2 )
+  
+  
+  for (j in 2:ncol(select.all)) {
+    
+    lines(1:nrow(select.all), select.all[,j], col=j)
+    
+  }
+  
+  
+  
+}
+
+
+expand=2
+
+map.plot(ref=ref,map=map, expand=2)
+
+
+
+
+
+
+
+
+
 get.chr <- function (x, sep=sep, pos=1) {
   
    strsplit(x,split=sep)[[1]][pos]
