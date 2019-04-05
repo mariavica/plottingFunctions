@@ -10,8 +10,12 @@ map <- data.frame(chr=rep('chr1',10),start=c(100,200,300,400,500,600,700,800,900
                   V2=rnorm(10,mean = 2))
 
 
+map <- read.table('PCM.index.bed', header = FALSE, sep='\t')
+ref <- read.table('fc3e8b36a_dec8ab5e3.borders.bed', header = FALSE, sep='\t')
 
-map.plot <- function ( ref, map , grouping, expand=5 ) {
+
+
+map.plot <- function ( ref, map , grouping, expand=5, show.orig=FALSE ) {
   
   # check columns
   ref[,1]<-as.character(ref[,1])
@@ -29,8 +33,9 @@ map.plot <- function ( ref, map , grouping, expand=5 ) {
   #sort map
   map <- map[with(map, order(chr, start)),]
   
-  select.all <- matrix(0, ncol=4:ncol(map), nrow=expand*2+1)
+  select.all <- matrix(0, ncol=(ncol(map)-3), nrow=expand*2+1)
 
+  numbers <- matrix(0, ncol=(ncol(map)-3), nrow=expand*2+1)
   
   
   for (i in 1:nrow(ref)) {
@@ -38,39 +43,61 @@ map.plot <- function ( ref, map , grouping, expand=5 ) {
     # find 
     sel <- which(map[,1]==ref[i,1])
     
-    sel.more <- which(map[sel,2] <= ref[i,2] &  map[sel,3] >= ref[i,2] )  # identify the right thing
+    sel.more <- which(map[sel,2] <= ref[i,2] &  map[sel,2] >= ref[i,2] )  # identify the right thing
     
-    select.all <- select.all + map[ sel[ c( max(1,sel.more-expand) : min(length(sel),sel.more+expand  ) )   ] , 4:ncol(map) ]
+    if (length(sel.more)==1) {
     
-    #coordinates <- map[ sel[ c( max(1,sel.more-expand) : min(length(sel),sel.more+expand  ) )   ] , 1:3 ]
-    
+      sel.sel <- c( (sel.more-expand) : (sel.more+expand) )
+      sel.sel[which(sel.sel<0)]<-0
+      
+      tocp <-map[ sel[ sel.sel   ] , 4:ncol(map) ]
+      
+      numbers <- numbers + as.numeric(!is.na(tocp))
+      
+      for (ii in 1:nrow(tocp)) {
+        for (jj in 1:ncol(tocp)) {
+          if (is.na(tocp[ii,jj])==TRUE) tocp[ii,jj]<-0
+        }
+      }
+      
+      select.all <- select.all + tocp
+      
+    }
+
   }
   
-  select.all <- select.all/nrow(ref)
+  select.all <- select.all/numbers
   
+  ### smooth 
   
-  plot (  1:(expand*2+1), select.all[,1], type='l', ylim=c(min(select.all),max(select.all)  ),
+  plot (  spline(1:(expand*2+1), select.all[,1], n=1000 ), type='l', ylim=c(min(select.all),max(select.all)  ),
           #main=paste(coordinates[1,1], coordinates[1,2], coordinates[nrow(coordinates),3], sep=':'),
           ylab='signal',xlab='position',xaxt='n')
-  axis(1, at=1:nrow(select.all), apply(coordinates[,2:3],1,mean), las=2 )
+
+  step <- map[1,3]-map[1,2]
   
-  
+  axis(1, at=1:(expand*2+1), c(  rev( -(1:expand)*step ), 0,  (1:expand)*step ) , las=2 )
+
   for (j in 2:ncol(select.all)) {
     
-    lines(1:nrow(select.all), select.all[,j], col=j)
+    lines(spline(1:(expand*2+1), select.all[,j], n=1000 ), col=j)
     
   }
   
   
+  if (show.orig) {
+    
+    for (j in 1:ncol(select.all)) {
+      lines(1:(expand*2+1), select.all[,j], col=j, lty=2)
+    }
+
+  }
+
   
 }
 
 
-expand=2
-
-map.plot(ref=ref,map=map, expand=2)
-
-
+map.plot(ref=ref,map=map, expand=5, show.orig = TRUE)
 
 
 
