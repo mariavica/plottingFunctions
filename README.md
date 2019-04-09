@@ -1,11 +1,21 @@
-# plottingFunctions
+---
+title: "PlottingFunctions package"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
 
-An R package with special plotting functions.
+The package can be installed via github:
 
-To install the package, type:
-```R
+```{r}
 library(devtools)
-install_github("mariavica/plottingFunctions", ref="master", build_vignettes = FALSE)
+devtools::install_github("https://github.com/mariavica/plottingFunctions")
+library(plottingFunctions)
 ```
 
-maria.vila@crg.eu
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
