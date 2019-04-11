@@ -1,0 +1,35 @@
+---
+title: "PlottingFunctions package"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+The package can be installed via github:
+
+```{r}
+library(devtools)
+if(!require(plottingFunctions)) {
+  devtools::install_github("mariavica/plottingFunctions", ref="master", build_vignettes = FALSE)
+}
+library(plottingFunctions)
+```
+
+### Map.plot function
+This is how variables are:
+
+```{r}
+data(map)
+data(ref)
+map[1000:1004,]
+head(ref)
+```
+
+``map`` variable refers to the (missing values are allowed). ``ref`` is a bedfile with the regions that you want to plot. The plot should look like this:
+```{r}
+map.plot(ref=ref,map=map, expand=5, show.orig = TRUE)
+```
+
+
+
