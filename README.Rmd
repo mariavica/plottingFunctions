@@ -3,8 +3,13 @@ title: "PlottingFunctions package"
 output:
   html_document:
     df_print: paged
+    toc: true
+   # theme: paper
   pdf_document: default
 ---
+
+# Package installation
+
 
 The package can be installed via github:
 
@@ -16,12 +21,17 @@ if(!require(plottingFunctions)) {
 library(plottingFunctions)
 ```
 
-### Map.plot function
+# HiC related functions:
+
+## map.plot
 This is how variables are:
 
-```{r}
+```{r include=FALSE}
 data(map)
 data(ref)
+```
+
+```{r}
 map[1000:1004,]
 head(ref)
 ```
@@ -30,6 +40,27 @@ head(ref)
 ```{r}
 map.plot(ref=ref,map=map, expand=5, show.orig = TRUE)
 ```
+
+
+## plotTwoTrends
+
+
+## selectAB
+
+
+## correctAB
+
+
+# Miscellania
+
+## get.chr
+
+Select the desired character
+
+```{r}
+get.chr(c('a-b-c-d'), sep='-', pos=2)
+```
+
 
 
 

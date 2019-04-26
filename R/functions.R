@@ -2,16 +2,16 @@
 
 #####
 
-ref <- data.frame(chr=c('chr1'),start=c(300,600), end=c(400,700))
+#ref <- data.frame(chr=c('chr1'),start=c(300,600), end=c(400,700))
 
-map <- data.frame(chr=rep('chr1',10),start=c(100,200,300,400,500,600,700,800,900,1000),
-                  end=c(100,200,300,400,500,600,700,800,900,1000)+99,
-                  V1=rnorm(10),
-                  V2=rnorm(10,mean = 2))
+#map <- data.frame(chr=rep('chr1',10),start=c(100,200,300,400,500,600,700,800,900,1000),
+#                  end=c(100,200,300,400,500,600,700,800,900,1000)+99,
+#                  V1=rnorm(10),
+#                  V2=rnorm(10,mean = 2))
 
 
-map <- read.table('PCM.index.bed', header = FALSE, sep='\t')
-ref <- read.table('fc3e8b36a_dec8ab5e3.borders.bed', header = FALSE, sep='\t')
+#map <- read.table('PCM.index.bed', header = FALSE, sep='\t')
+#ref <- read.table('fc3e8b36a_dec8ab5e3.borders.bed', header = FALSE, sep='\t')
 
 
 
@@ -97,7 +97,7 @@ map.plot <- function ( ref, map , grouping, expand=5, show.orig=FALSE ) {
 }
 
 
-map.plot(ref=ref,map=map, expand=5, show.orig = TRUE)
+#map.plot(ref=ref,map=map, expand=5, show.orig = TRUE)
 
 
 
@@ -198,6 +198,50 @@ selectAB <- function (x.list, ref.at) {
 	return(x2.list)
 
 }
+
+
+
+
+
+
+
+GOheatmap <- function(genes, cluster=NA, plot=TRUE) {
+  
+  if (!requireNamespace("clusterProfiler", quietly = TRUE)) {
+    stop("Package \"clusterProfiler\" needed for this function to work. Please install it.",
+         call. = FALSE)
+  } 
+  
+  if (is.list(genes)) {
+    
+    
+    
+  } else {
+    
+    
+    
+  }
+  
+  
+  
+  
+  if (plot) {
+    
+    pheatmap(mat)
+    
+  } else {
+
+    return(mat)
+
+  }
+  
+  
+}
+
+
+
+
+
 
 
 
@@ -409,7 +453,7 @@ plotTwoTrends <- function(x1, x2, x = NA,
   
  # plotTwoTrends(x1 = a, x2 = b , loess = TRUE , expand = 0.75)
   
-  plotTwoTrends(x1 = a, x2 = b , loess = TRUE , expand = 0.75, main = 'Juju', name.1 = 'a', name.2 = 'b')
+#  plotTwoTrends(x1 = a, x2 = b , loess = TRUE , expand = 0.75, main = 'Juju', name.1 = 'a', name.2 = 'b')
   
 
 
@@ -422,14 +466,14 @@ plotTwoTrends <- function(x1, x2, x = NA,
 
 
 
-  library(h5)
-  testmat <- matrix(rpois(1000000,lambda=50), ncol = 1000, nrow=1000)
+#  library(h5)
+#  testmat <- matrix(rpois(1000000,lambda=50), ncol = 1000, nrow=1000)
   # Create HDF5 File
-  file <- h5file("test.h5")
+#  file <- h5file("test.h5")
   # Save matrix to file in group 'testgroup' and datasetname 'testmat'
-  file["testgroup", "testmat"] <- testmat
+#  file["testgroup", "testmat"] <- testmat
   # Close file
-  h5close(file)
+#  h5close(file)
   
   
   
