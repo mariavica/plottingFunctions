@@ -1,9 +1,10 @@
 Package: plottingFunctions
 Type: Package
 Title: What the package does (short line)
-Version: 1.0
+Version: 0.1
 Date: 2018-12-12
 Author: Maria Vila Casadesus
 Maintainer: Maria Vila Casadesus <maria.vila@crg.eu>
 Description: More about what it does (maybe more than one line)
-License: What license is it under?
+Suggests: clusterProfiler
+License: GPL-3
