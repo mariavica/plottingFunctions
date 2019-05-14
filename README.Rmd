@@ -24,7 +24,7 @@ library(plottingFunctions)
 # HiC related functions:
 
 ## map.plot
-This is how variables are:
+This is how variables are: ``map`` variable refers to the (missing values are allowed) and ``ref`` is a bedfile with the regions that you want to plot.
 
 ```{r include=FALSE}
 data(map)
@@ -33,11 +33,16 @@ data(ref)
 
 ```{r}
 map[1000:1004,]
+```
+
+```{r}
 head(ref)
 ```
 
-``map`` variable refers to the (missing values are allowed). ``ref`` is a bedfile with the regions that you want to plot. The plot should look like this:
+The plot should look like this:
 ```{r}
+data(map)
+data(ref)
 map.plot(ref=ref,map=map, expand=5, show.orig = TRUE)
 ```
 
@@ -61,6 +66,20 @@ Select the desired character
 get.chr(c('a-b-c-d'), sep='-', pos=2)
 ```
 
+
+## GOheatmap
+
+
+```{r}
+
+genes <-list( a=c('Fgfr3'), b=c('Dyrk1a','Ctcf'))
+
+genes <-c('Fgfr3','Dyrk1a','Ctcf')
+cluster <- c(1,2,2)
+
+GOheatmap(genes=genes , cluster=cluster, organism="mouse")
+
+```
 
 
 

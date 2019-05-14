@@ -201,37 +201,119 @@ selectAB <- function (x.list, ref.at) {
 
 
 
-
-
-
-
-GOheatmap <- function(genes, cluster=NA, plot=TRUE) {
+GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize = NA,
+                      maxGSSize = NA, colnames = NA, cutoff.top=NA, cutoff.dw=NA,
+                      simplify.cutoff = NA) {
   
   if (!requireNamespace("clusterProfiler", quietly = TRUE)) {
     stop("Package \"clusterProfiler\" needed for this function to work. Please install it.",
          call. = FALSE)
   } 
   
+  #lab <- 
+  
+  require(clusterProfiler)
+  
+  #organism="human"
+  
+ # if (organism=="human") { require(org.Hs.eg.db); organism<-org.Hs.eg.db }
+ # if (organism=="mouse") { require(org.Mm.eg.db); organism<-org.Mm.eg.db }
+  
+  require(org.Hs.eg.db); organism<-org.Hs.eg.db
+  
   if (is.list(genes)) {
-    
-    
-    
+ 
   } else {
-    
-    
     
   }
   
+  #get all possible GO terms
+  results <- enrichGO(gene         = as.character(genes),
+                      OrgDb         = organism,
+                      keytype       = 'SYMBOL',
+                      ont           = "BP",
+                      pAdjustMethod = "BH",
+                      minGSSize = minGSSize,
+                      maxGSSize = maxGSSize,
+                      pvalueCutoff  = 1,
+                      qvalueCutoff  = 1)
   
+  if (!is.na(simplify.cutoff)) {
+    results <- simplify(results,cutoff=simplify.cutoff)
+  }
   
+  mat.pval <- matrix(1, ncol=length(unique(cluster)), nrow= nrow(results) )
+  rownames(mat.pval) <- results$ID
+  description <- results$Description
+
+  mat.padjust <- mat.pval
+  mat.generatio <- mat.pval
+  mat.qvalue <- mat.pval
   
+  #analyze cluster by cluster
+  for (i in 1:length(unique(cluster))) {
+    
+    results <- enrichGO(gene         = as.character(genes)[which(cluster==i)],
+                        OrgDb         = organism,
+                        keytype       = 'SYMBOL',
+                        ont           = "BP",
+                        pAdjustMethod = "BH",
+                        minGSSize = minGSSize,
+                        maxGSSize = maxGSSize,
+                        pvalueCutoff  = 1,
+                        qvalueCutoff  = 1)
+    sel <- which((results$ID %in% rownames(mat.pval)) == TRUE)
+    
+    mat.pval[results$ID[sel],i]<-results$pvalue[sel]
+    mat.padjust[results$ID[sel],i]<-results$p.adjust[sel]
+    mat.generatio[results$ID[sel],i]<-results$GeneRatio[sel]
+    mat.qvalue[results$ID[sel],i]<-results$qvalue[sel]
+    print(i)
+    
+  }  
+    
+    
+  require(pheatmap)
+  #print if needed
   if (plot) {
     
-    pheatmap(mat)
+    sel <- which(apply(mat.padjust,1,min)<0.05)
+    
+    toplot <- -log10(mat.padjust[sel,])
+    
+    print(head(toplot))
+    
+    toplot2<-toplot
+    
+    if (!is.na(cutoff.top)) {
+      for (i in 1:nrow(toplot)) {
+        for (j in 1:ncol(toplot)) {
+          if (toplot[i,j]>cutoff.top) toplot[i,j]<-cutoff.top
+        }
+      }
+    }
+    
+    print(head(toplot))
+
+    if (!is.na(cutoff.dw)) {
+      for (i in 1:nrow(toplot)) {
+        for (j in 1:ncol(toplot)) {
+          if (toplot[i,j]<cutoff.dw) toplot[i,j]<-cutoff.dw
+        }
+      }
+    }
+    
+    
+        
+    pheatmap(toplot, clustering_distance_rows='correlation', 
+             cluster_cols = FALSE, labels_row = description[sel],
+             labels_col=colnames)
+    
     
   } else {
 
-    return(mat)
+    return(list(   mat.pval, mat.padjust, mat.generatio, mat.qvalue
+    ))
 
   }
   
