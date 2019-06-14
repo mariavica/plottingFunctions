@@ -203,7 +203,7 @@ selectAB <- function (x.list, ref.at) {
 
 GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize = NA,
                       maxGSSize = NA, colnames = NA, cutoff.top=NA, cutoff.dw=NA,
-                      simplify.cutoff = NA) {
+                      simplify.cutoff = NA, labels_col=unique(cluster)) {
   
   if (!requireNamespace("clusterProfiler", quietly = TRUE)) {
     stop("Package \"clusterProfiler\" needed for this function to work. Please install it.",
@@ -307,23 +307,50 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
         
     pheatmap(toplot, clustering_distance_rows='correlation', 
              cluster_cols = FALSE, labels_row = description[sel],
-             labels_col=colnames)
+             labels_col=labels_col, color=colorRampPalette(c("white", "blue"))( 20))
     
     
   } else {
 
-    return(list(   mat.pval, mat.padjust, mat.generatio, mat.qvalue
-    ))
+   
 
   }
+  
+  return(list(   mat.pval, mat.padjust, mat.generatio, mat.qvalue, description[sel]
+  ))
   
   
 }
 
 
 
+x <- matrix(rnorm(10), ncol=5, nrow=2)
+groups <- c(1,1,2,2,2)
 
 
+
+plotStackedGenes <- function (x, groups) {
+  
+  means <- aggregate(t(x), by=list(groups), mean)
+  
+  shap <- barplot(t(as.matrix(means[,-1])),beside=TRUE, ylim=c(-2,2))
+  
+  tt <- table(groups)
+  
+  for (i in 1:nrow(x)) {
+    
+    for (j in 1:nrow(means)) {
+      
+      points(rep(shap[i,j], tt[j]), x[i,(1:tt[j])+sum(tt[(0):(j-1)])], pch=19)
+
+    }
+  
+    
+  }
+  
+  
+  
+}
 
 
 
