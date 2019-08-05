@@ -556,7 +556,25 @@ plotTwoTrends <- function(x1, x2, x = NA,
 }
 
   
+
+printScript <- function (x=NULL, type) {
   
+  #
+  
+  if (!is.null(x)) { sink(paste(x,'.sh',sep='')) }
+  
+  
+  
+  
+  
+  if (!is.null(x)) { sink() }
+  
+  
+}
+
+
+
+
  # a <- matrix(rnorm(1000), ncol=10, nrow = 100)
 #  b <- matrix(rnorm(1000), ncol=10, nrow = 100)
   
