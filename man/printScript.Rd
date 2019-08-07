@@ -2,20 +2,24 @@
 \alias{printScript}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
-Plot two trends}
+Print the script}
 \description{
-%%  ~~ A concise (1-5 lines) description of what the function does. ~~
+Prints a standard script that can be used for the analysis in HPC environment at CRG.
 }
 \usage{
-printScript ( x = NULL, type , genome , sequencing , loc )
+printScript ( x = NULL, type , genome , sequencing , loc ,
+  cores = 8 , mem = '70G' , file = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{name of the file}
+  \item{x}{job name}
   \item{type}{one of: \code{'RNAseq'}, \code{'ATACseq'}, \code{'ChipSeq'}, \code{'HiC'}}
   \item{genome}{version of the genoma you are aligning to: \code{'mm10'} or \code{'hg38'}}
   \item{sequencing}{\code{'singe'} (or \code{'singe-end'}) or \code{'paired'} (or \code{'paired-end'})}
   \item{loc}{localization: \code{'geo'} will download data from GEO database, \code{'local'} will download data from the selected folder}
+  \item{cores}{number of cores that will be used. Default: 8.}
+  \item{mem}{memory used. Default: '70G'}
+  \item{file}{name of the file}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -43,8 +47,7 @@ printScript ( x = NULL, type , genome , sequencing , loc )
 %% ~~objects to See Also as \code{\link{help}}, ~~~
 }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-
+printScript('ChipSeq', type='ChipSeq')
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.

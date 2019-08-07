@@ -557,28 +557,34 @@ plotTwoTrends <- function(x1, x2, x = NA,
 
   
 
-printScript <- function (x=NULL, type, genome='mm10', sequencing='single') {
+printScript <- function (x=NULL, type, genome='mm10', sequencing='single', cores=8, loc='geo',
+                         mem='70G', queue='short', file=NULL) {
   
   # type: one of
   # genome: alignment wanted
   # sequencing: single or paired-end
   # loc: geo or local
   
-  if (!is.null(x)) { sink(paste(x,'.sh',sep='')) }
+  
+  if (type=='HiC') {queue <- "long-sl7" ; timing <- "#$ -l h_rt=148:0:0"}
+  if (type=='RNAseq' | type=='ChipSeq' | type=='ATACseq') {queue <- "short-sl7" ; timing<-'##$ -l h_rt=148:0:0'}
+  
+  
+  if (!is.null(file)) { sink(paste(file,'.sh',sep='')) }
 
   # header 
   
-  cat("#!/bin/bash
+  cat(paste("#!/bin/bash
 
-#$ -N MP-peaks
+#$ -N ",x,"
 #$ -q short-sl7
-##$ -l h_rt=248:0:0
-#$ -l virtual_free=40G
+",timing,"
+#$ -l virtual_free=",mem,"
 #$ -M maria.vila@crg.eu
 #$ -m base
-#$ -pe smp 1
+#$ -pe smp ",cores,"
 #$ -cwd
-")
+",sep=''))
   
 
   # ids and names
@@ -607,28 +613,37 @@ module load Python/2.7.11-foss-2016a
   
   if (sequencing=='single'  | sequencing=='single-end') {
     cat("
-        mv $todownload.fastq $describer.fastq
-        
-        ") 
+mv $todownload.fastq $describer.fastq
+
+mkdir FastQC
+
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}.fastq --outdir=./FastQC
+
+") 
     }
   
 
   if (sequencing=='paired-end' | sequencing=='paired') {
-    cat("
-        mv ${todownload}_1.fastq ${describer}_R1.fastq
-        mv ${todownload}_2.fastq ${describer}_R2.fastq
+    cat(paste("
+mv ${todownload}_1.fastq ${describer}_R1.fastq
+mv ${todownload}_2.fastq ${describer}_R2.fastq
 
-        ") 
+mkdir FastQC
+
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}_R1.fastq --outdir=./FastQC
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}_R2.fastq --outdir=./FastQC
+
+",sep='')) 
   }
   
   
   
-  if (!is.null(x)) { sink() }
+  if (!is.null(file)) { sink() }
   
   
 }
 
-
+cat(paste("",sep=''))
 
 
  # a <- matrix(rnorm(1000), ncol=10, nrow = 100)
