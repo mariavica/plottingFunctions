@@ -557,13 +557,69 @@ plotTwoTrends <- function(x1, x2, x = NA,
 
   
 
-printScript <- function (x=NULL, type) {
+printScript <- function (x=NULL, type, genome='mm10', sequencing='single') {
   
-  #
+  # type: one of
+  # genome: alignment wanted
+  # sequencing: single or paired-end
+  # loc: geo or local
   
   if (!is.null(x)) { sink(paste(x,'.sh',sep='')) }
+
+  # header 
   
+  cat("#!/bin/bash
+
+#$ -N MP-peaks
+#$ -q short-sl7
+##$ -l h_rt=248:0:0
+#$ -l virtual_free=40G
+#$ -M maria.vila@crg.eu
+#$ -m base
+#$ -pe smp 1
+#$ -cwd
+")
   
+
+  # ids and names
+  
+  cat("
+ids=( )
+names=( )
+
+id=${ids[$SGE_TASK_ID-1]}
+describer=${names[$SGE_TASK_ID-1]}
+")
+
+  
+  ### download data if GEO
+  if (loc=='geo') {
+    cat("
+module use /software/as/el7.2/EasyBuild/CRG/modules/all
+module load Python/2.7.11-foss-2016a
+
+/software/tgraf/sratoolkit.2.8.2-ubuntu64/bin/fastq-dump.2.8.2 --split-3 $todownload
+")
+    
+    
+    
+  }
+  
+  if (sequencing=='single'  | sequencing=='single-end') {
+    cat("
+        mv $todownload.fastq $describer.fastq
+        
+        ") 
+    }
+  
+
+  if (sequencing=='paired-end' | sequencing=='paired') {
+    cat("
+        mv ${todownload}_1.fastq ${describer}_R1.fastq
+        mv ${todownload}_2.fastq ${describer}_R2.fastq
+
+        ") 
+  }
   
   
   

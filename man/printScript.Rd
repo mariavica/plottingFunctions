@@ -7,13 +7,15 @@ Plot two trends}
 %%  ~~ A concise (1-5 lines) description of what the function does. ~~
 }
 \usage{
-printScript (x = NULL)
-
-
+printScript ( x = NULL, type , genome , sequencing , loc )
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{x}{dataset 1}
+  \item{x}{name of the file}
+  \item{type}{one of: \code{'RNAseq'}, \code{'ATACseq'}, \code{'ChipSeq'}, \code{'HiC'}}
+  \item{genome}{version of the genoma you are aligning to: \code{'mm10'} or \code{'hg38'}}
+  \item{sequencing}{\code{'singe'} (or \code{'singe-end'}) or \code{'paired'} (or \code{'paired-end'})}
+  \item{loc}{localization: \code{'geo'} will download data from GEO database, \code{'local'} will download data from the selected folder}
 }
 \details{
 %%  ~~ If necessary, more details than the description above ~~
@@ -46,4 +48,4 @@ printScript (x = NULL)
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{bash}% use one of  RShowDoc("KEYWORDS")
+\keyword{bash}% use one of  RShowDoc('KEYWORDS')
