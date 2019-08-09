@@ -4,7 +4,7 @@
 \title{
 Print the script}
 \description{
-Prints a standard script that can be used for the analysis in HPC environment at CRG.
+Prints a standard script written in bash that can be used for the analysis in HPC environment at CRG.
 }
 \usage{
 printScript ( x = NULL, type , genome , sequencing , loc ,
@@ -14,7 +14,7 @@ printScript ( x = NULL, type , genome , sequencing , loc ,
 \arguments{
   \item{x}{job name}
   \item{type}{one of: \code{'RNAseq'}, \code{'ATACseq'}, \code{'ChipSeq'}, \code{'HiC'}}
-  \item{genome}{version of the genoma you are aligning to: \code{'mm10'} or \code{'hg38'}}
+  \item{genome}{version of the genoma you are aligning to: \code{'mm10'} or \code{'hg38'} (for \code{'RNAseq'} also \code{'hg19'} also works.)}
   \item{sequencing}{\code{'singe'} (or \code{'singe-end'}) or \code{'paired'} (or \code{'paired-end'})}
   \item{loc}{localization: \code{'geo'} will download data from GEO database, \code{'local'} will download data from the selected folder}
   \item{cores}{number of cores that will be used. Default: 8.}

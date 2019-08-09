@@ -555,7 +555,11 @@ plotTwoTrends <- function(x1, x2, x = NA,
   
 }
 
-  
+
+
+library(utils)
+?select.list
+
 
 printScript <- function (x=NULL, type, genome='mm10', sequencing='single', cores=8, loc='geo',
                          mem='70G', queue='short', file=NULL) {
@@ -565,11 +569,23 @@ printScript <- function (x=NULL, type, genome='mm10', sequencing='single', cores
   # sequencing: single or paired-end
   # loc: geo or local
   
+  if (sequencing=='single-end') sequencing<-'single'
+  if (sequencing=='paired-end') sequencing<-'paired'
   
   if (type=='HiC') {queue <- "long-sl7" ; timing <- "#$ -l h_rt=148:0:0"}
   if (type=='RNAseq' | type=='ChipSeq' | type=='ATACseq') {queue <- "short-sl7" ; timing<-'##$ -l h_rt=148:0:0'}
   
+  continue <- 1; require(utils)
+  if (type=='ATACseq' & sequencing=='single') {
+    continue <- select.list(c('yes','no'),title="ATACseq data goes usually with paired-end samples, are you sure?")
+  }
+  if (type=='ChipSeq' & sequencing=='paired') {
+    continue <- select.list(c('yes','no'),title="ChipSeq data goes usually with single-end samples, are you sure?")
+  }
+
+  if (continue=="no") stop("Printing stopped.", call.=FALSE)
   
+    
   if (!is.null(file)) { sink(paste(file,'.sh',sep='')) }
 
   # header 
@@ -597,6 +613,9 @@ id=${ids[$SGE_TASK_ID-1]}
 describer=${names[$SGE_TASK_ID-1]}
 ")
 
+  if (genome=='mm10') loc.genome <- "/users/tgraf/marvila/Genomes/mm10/Bowtie_index/mm10"
+  if (genome=='hg38') loc.genome <- "/users/tgraf/marvila/Genomes/hg38/hg38"
+  
   
   ### download data if GEO
   if (loc=='geo') {
@@ -606,35 +625,193 @@ module load Python/2.7.11-foss-2016a
 
 /software/tgraf/sratoolkit.2.8.2-ubuntu64/bin/fastq-dump.2.8.2 --split-3 $todownload
 ")
+
+    if (sequencing=='single') { cat("
+mv $todownload.fastq $describer.fastq
+")
+      }
+    if (sequencing=='paired') { cat("
+mv ${todownload}_1.fastq ${describer}_R1.fastq
+mv ${todownload}_2.fastq ${describer}_R2.fastq
+")
+    }
     
-    
+# processing the data is equal for 
     
   }
   
-  if (sequencing=='single'  | sequencing=='single-end') {
+  if (sequencing=='single') {
     cat("
-mv $todownload.fastq $describer.fastq
-
 mkdir FastQC
 
 /software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}.fastq --outdir=./FastQC
+
+/software/tgraf/TrimGalore/trim_galore ${describer}.fastq #--path_to_cutadapt /software/as/el7.2/EasyBuild/CRG/software/cutadapt/1.9.1-foss-2016a-Python-2.7.11/
+
+rm $describer.fastq
+
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}>_trimmed.fq --outdir=./FastQC
+
 
 ") 
     }
   
 
-  if (sequencing=='paired-end' | sequencing=='paired') {
+  if (sequencing=='paired') {
     cat(paste("
-mv ${todownload}_1.fastq ${describer}_R1.fastq
-mv ${todownload}_2.fastq ${describer}_R2.fastq
 
 mkdir FastQC
 
 /software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}_R1.fastq --outdir=./FastQC
 /software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}_R2.fastq --outdir=./FastQC
 
+/software/tgraf/TrimGalore/trim_galore --paired ${describer}_R1.fastq ${describer}_R2.fastq #--path_to_cutadapt /software/as/el7.2/EasyBuild/CRG/software/cutadapt/1.9.1-foss-2016a-Python-2.7.11/
+
+rm ${describer}_R1.fastq
+rm ${describer}_R2.fastq
+
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}>_R1_val_1.fq --outdir=./FastQC
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}>_R2_val_2.fq --outdir=./FastQC
+
 ",sep='')) 
   }
+  
+  
+### alignment until bigwig
+   
+  if (type=='ATACseq' | type=='ChipSeq') {
+    
+    if (sequencing=='paired') {
+ 
+      cat(paste("
+/users/tgraf/marvila/software/bowtie2-2.2.4/bowtie2 -p ",cores," -x ",loc.genome," -1 ${describer}_R1_val_1.fq -2 ${describer}_R2_val_2.fq 2> ${describer}.log -S ${describer}.sam
+",sep=''))
+
+    }
+    if (sequencing=='single') {
+      cat(paste("
+/users/tgraf/marvila/software/bowtie2-2.2.4/bowtie2 -p ",cores," -x ",loc.genome," ${describer}_trimmed.fq  2> ${describer}.log -S ${describer}.sam
+",sep=''))
+
+    }
+    
+     
+    ## common part
+    
+cat(paste("
+# Convert file from SAM to BAM format  
+samtools view -bSo ${describer}.bam  ${describer}.sam
+rm ${describer}.sam
+    
+# Sort BAM file  
+samtools sort -T tmp_${describer}_sorted  -o ${describer}_sorted.bam ${describer}.bam     
+rm ${describer}.bam
+    
+# index the bam file  
+samtools index ${describer}_sorted.bam
+    
+    
+##### best align (clean bams)
+samtools view -F 2304 -b -q 10 ${describer}_sorted.bam > ${describer}_clean_sorted.bam
+    
+rm ${describer}_sorted.bam
+    
+    
+##### discard duplicated PCR
+java -jar /users/tgraf/marvila/software/picard-tools-2.3.0/picard.jar MarkDuplicates INPUT=${describer}_clean_sorted.bam OUTPUT=clean.${describer}_clean_sorted.bam METRICS_FILE=clean.${describer}_sorted.stats REMOVE_DUPLICATES=true ASSUME_SORTED=true VERBOSITY=WARNING
+    
+rm ${describer}_clean_sorted.bam
+
+samtools index clean.${describer}_clean_sorted.bam
+",sep=''))
+    
+
+### write bigwig
+  
+if (sequencing=='paired') {
+  
+  cat(paste("
+/software/tgraf/deeptools/bamCoverage --bam clean.${describer}_clean_sorted.bam --binSize 1 --effectiveGenomeSize 2750570000 --numberOfProcessors ",cores," --outFileName ${describer}.bw --extendReads --outFileFormat bigwig
+",sep=''))
+}
+if (sequencing=='single') {
+  cat(paste("
+/software/tgraf/deeptools/bamCoverage --bam clean.${describer}_clean_sorted.bam --binSize 1 --effectiveGenomeSize 2750570000 --numberOfProcessors ",cores," --outFileName ${describer}.bw --extendReads 141 --outFileFormat bigwig
+",sep=''))  
+}
+
+
+
+
+  
+  }
+  
+  
+### alignment until .h5
+  
+  if (type=='HiC') {
+    
+    if (genome=='mm10') filt.chrom <- "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chrX chrY"
+    if (genome=='hg38') filt.chrom <- "chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chrX chrY"
+    
+    cat(paste("
+
+
+/users/tgraf/marvila/software/bowtie2-2.2.4/bowtie2 -p ",cores," --reorder --local -x ",loc.genome," ${describer}_R1_val_1.fq 2> ${describer}_R1.log -S ${describer}_R1.sam
+  
+rm ${describer}_R1_val_1.fq
+  
+/users/tgraf/marvila/software/bowtie2-2.2.4/bowtie2 -p ",cores," --reorder --local -x ",loc.genome," ${describer}_R2_val_2.fq 2> ${describer}_R2.log -S ${describer}_R2.sam
+  
+rm ${describer}_R2_val_2.fq
+
+resolutions=(10000 100000)
+for i in $resolutions ; do  
+hicBuildMatrix --samFiles ${describer}_R1.sam  ${describer}_R2.sam --binSize $i --restrictionSequence GATC --threads ",cores," --inputBufferSize 200000 -o torm_${describer}_${i}_matrix.h5 --QCfolder ./hicQC --outBam ${describer}_res$i.bam
+hicCorrectMatrix diagnostic_plot --matrix torm_${describer}_${i}_matrix.h5 -o plot_diagnostic_${describer}_res$i.png
+#hicCorrectMatrix correct --matrix torm_${describer}_${i}_matrix.h5 --filterThreshold -2 5 -o hic_${describer}_res$i.h5 --chromosomes ",filt.chrom,"
+
+done
+
+rm ${describer}_R1.sam
+rm ${describer}_R2.sam
+
+
+",sep='')) 
+    
+    
+    
+  }
+
+  if (type=='RNAseq') {
+    
+    
+    if (genome=='mm10') genome.loc <- "/users/tgraf/agomez/Genomes/mm10_STAR"
+    if (genome=='hg38') genome.loc <- "/users/tgraf/agomez/Genomes/hg38_STAR"
+    if (genome=='hg19') genome.loc <- "/users/tgraf/agomez/Genomes/hg19_STAR"
+    
+    
+    cat(paste("
+
+
+",sep='')) 
+    
+    
+    
+    
+    /software/tgraf/STAR/bin/Linux_x86_64/STAR --genomeDir /users/tgraf/agomez/Genomes/mm10_STAR --sjdbGTFfile /users/tgraf/marvila/Genomes/gencode.vM17.annotation.gtf --readFilesIn $describer.fastq --runThreadN 8 --outFileNamePrefix STAR_$describer --outSAMtype BAM SortedByCoordinate --genomeLoad NoSharedMemory --outWigType bedGraph --outWigStrand Unstranded --quantMode GeneCounts
+    
+    samtools index STAR_${describer}Aligned.sortedByCoord.out.bam
+    
+    bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --effectiveGenomeSize 2150570000 --numberOfProcessors 8 --outFileName ${describer}.bw --extendReads 141 --outFileFormat bigwig
+    
+    
+    
+    
+    
+  }
+
+  
   
   
   
