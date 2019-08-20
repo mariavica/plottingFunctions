@@ -556,11 +556,6 @@ plotTwoTrends <- function(x1, x2, x = NA,
 }
 
 
-
-library(utils)
-?select.list
-
-
 printScript <- function (x=NULL, type, genome='mm10', sequencing='single', cores=8, loc='geo',
                          mem='70G', queue='short', file=NULL) {
   
@@ -786,29 +781,32 @@ rm ${describer}_R2.sam
   if (type=='RNAseq') {
     
     
-    if (genome=='mm10') genome.loc <- "/users/tgraf/agomez/Genomes/mm10_STAR"
-    if (genome=='hg38') genome.loc <- "/users/tgraf/agomez/Genomes/hg38_STAR"
+    if (genome=='mm10') {genome.loc <- "/users/tgraf/agomez/Genomes/mm10_STAR"; annot <- "/users/tgraf/marvila/Genomes/gencode.vM21.annotation.gtf"}
+    if (genome=='hg38') {genome.loc <- "/users/tgraf/agomez/Genomes/hg38_STAR"; annot <- "/users/tgraf/marvila/Genomes/gencode.v28.annotation.gtf"}
     if (genome=='hg19') genome.loc <- "/users/tgraf/agomez/Genomes/hg19_STAR"
     
+    if (sequencing=='single') {
+      cat(paste("
+
+/software/tgraf/STAR/bin/Linux_x86_64/STAR --genomeDir ",genome.loc," --sjdbGTFfile ",annot," --readFilesIn ${describer}_trimmed.fq --runThreadN ",cores," --outFileNamePrefix STAR_$describer --outSAMtype BAM SortedByCoordinate --genomeLoad NoSharedMemory --outWigType bedGraph --outWigStrand Unstranded --quantMode GeneCounts
     
-    cat(paste("
-
-
+samtools index STAR_${describer}Aligned.sortedByCoord.out.bam
+    
+bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --effectiveGenomeSize 2150570000 --numberOfProcessors ",cores," --outFileName ${describer}.bw --extendReads 141 --outFileFormat bigwig
 ",sep='')) 
+    }
     
+    if (sequencing=='paired') {
+      cat(paste("
+
+/software/tgraf/STAR/bin/Linux_x86_64/STAR --genomeDir ",genome.loc," --sjdbGTFfile ",annot," --readFilesIn ${describer}_R1_val_1.fq ${describer}_R2_val_2.fq --runThreadN ",cores," --outFileNamePrefix STAR_$describer --outSAMtype BAM SortedByCoordinate --genomeLoad NoSharedMemory --outWigType bedGraph --outWigStrand Unstranded --quantMode GeneCounts
     
+samtools index STAR_${describer}Aligned.sortedByCoord.out.bam
     
-    
-    /software/tgraf/STAR/bin/Linux_x86_64/STAR --genomeDir /users/tgraf/agomez/Genomes/mm10_STAR --sjdbGTFfile /users/tgraf/marvila/Genomes/gencode.vM17.annotation.gtf --readFilesIn $describer.fastq --runThreadN 8 --outFileNamePrefix STAR_$describer --outSAMtype BAM SortedByCoordinate --genomeLoad NoSharedMemory --outWigType bedGraph --outWigStrand Unstranded --quantMode GeneCounts
-    
-    samtools index STAR_${describer}Aligned.sortedByCoord.out.bam
-    
-    bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --effectiveGenomeSize 2150570000 --numberOfProcessors 8 --outFileName ${describer}.bw --extendReads 141 --outFileFormat bigwig
-    
-    
-    
-    
-    
+bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --effectiveGenomeSize 2150570000 --numberOfProcessors ",cores," --outFileName ${describer}.bw --extendReads --outFileFormat bigwig
+",sep='')) 
+    }
+ 
   }
 
   
@@ -820,7 +818,6 @@ rm ${describer}_R2.sam
   
 }
 
-cat(paste("",sep=''))
 
 
  # a <- matrix(rnorm(1000), ncol=10, nrow = 100)
