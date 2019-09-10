@@ -361,7 +361,6 @@ plotStackedGenes <- function (x, groups) {
 
 
 
-
 plotTwoTrends <- function(x1, x2, x = NA, 
                           col1 = 'red', col2 = 'blue', lwd = 3,
                           normalization = 'none', norm_independent = FALSE,
@@ -645,7 +644,7 @@ mkdir FastQC
 
 rm $describer.fastq
 
-/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}>_trimmed.fq --outdir=./FastQC
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}_trimmed.fq --outdir=./FastQC
 
 
 ") 
@@ -665,8 +664,8 @@ mkdir FastQC
 rm ${describer}_R1.fastq
 rm ${describer}_R2.fastq
 
-/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}>_R1_val_1.fq --outdir=./FastQC
-/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}>_R2_val_2.fq --outdir=./FastQC
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}_R1_val_1.fq --outdir=./FastQC
+/software/tgraf/FastQC/fastqc -t ",cores," -Xmx2048M ${describer}_R2_val_2.fq --outdir=./FastQC
 
 ",sep='')) 
   }
