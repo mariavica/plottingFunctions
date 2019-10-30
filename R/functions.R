@@ -603,7 +603,7 @@ printScript <- function (x=NULL, type, genome='mm10', sequencing='single', cores
 ids=( )
 names=( )
 
-id=${ids[$SGE_TASK_ID-1]}
+todownload=${ids[$SGE_TASK_ID-1]}
 describer=${names[$SGE_TASK_ID-1]}
 ")
 
@@ -630,6 +630,23 @@ mv ${todownload}_2.fastq ${describer}_R2.fastq
 ")
     }
     
+    if (loc!='geo') {
+      cat("folder=\'",loc,"\'
+          ")
+      
+      if (sequencing=='single') { cat("
+        cp ${folder}/$todownload.fastq $describer.fastq
+")
+      }
+      if (sequencing=='paired') { cat("
+        cp ${folder}/${todownload}_1.fastq ${describer}_R1.fastq
+        cp ${folder}/${todownload}_2.fastq ${describer}_R2.fastq
+")
+      }    
+      
+    }
+    
+    
 # processing the data is equal for 
     
   }
@@ -648,7 +665,7 @@ rm $describer.fastq
 
 
 ") 
-    }
+  }
   
 
   if (sequencing=='paired') {
@@ -780,9 +797,14 @@ rm ${describer}_R2.sam
   if (type=='RNAseq') {
     
     
-    if (genome=='mm10') {genome.loc <- "/users/tgraf/agomez/Genomes/mm10_STAR"; annot <- "/users/tgraf/marvila/Genomes/gencode.vM21.annotation.gtf"}
-    if (genome=='hg38') {genome.loc <- "/users/tgraf/agomez/Genomes/hg38_STAR"; annot <- "/users/tgraf/marvila/Genomes/gencode.v28.annotation.gtf"}
+    if (genome=='mm10') {genome.loc <- "/users/tgraf/agomez/Genomes/mm10_STAR";
+      annot <- "/users/tgraf/marvila/Genomes/gencode.vM21.annotation.gtf"
+      eff.genom <- '2150570000'}
+    if (genome=='hg38') {genome.loc <- "/users/tgraf/agomez/Genomes/hg38_STAR";
+      annot <- "/users/tgraf/marvila/Genomes/gencode.v28.annotation.gtf"
+      eff.genom <- '2750570000'}
     if (genome=='hg19') genome.loc <- "/users/tgraf/agomez/Genomes/hg19_STAR"
+      eff.genom <- '2750570000'
     
     if (sequencing=='single') {
       cat(paste("
@@ -791,7 +813,7 @@ rm ${describer}_R2.sam
     
 samtools index STAR_${describer}Aligned.sortedByCoord.out.bam
     
-bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --effectiveGenomeSize 2150570000 --numberOfProcessors ",cores," --outFileName ${describer}.bw --extendReads 141 --outFileFormat bigwig
+bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --normalizeUsing RPGC --effectiveGenomeSize ",eff.genom," --numberOfProcessors ",cores," --outFileName ${describer}.bw --extendReads 141 --outFileFormat bigwig
 ",sep='')) 
     }
     
@@ -802,10 +824,19 @@ bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --e
     
 samtools index STAR_${describer}Aligned.sortedByCoord.out.bam
     
-bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --effectiveGenomeSize 2150570000 --numberOfProcessors ",cores," --outFileName ${describer}.bw --extendReads --outFileFormat bigwig
+bamCoverage --bam STAR_${describer}Aligned.sortedByCoord.out.bam --binSize 1 --normalizeUsing RPGC --effectiveGenomeSize ",eff.genom," --numberOfProcessors ",cores," --outFileName ${describer}.bw --extendReads --outFileFormat bigwig
 ",sep='')) 
     }
  
+    
+    
+    if (genome=='mm10') {genome.loc <- "/users/tgraf/agomez/Genomes/mm10_STAR"; annot <- "/users/tgraf/marvila/Genomes/gencode.vM21.annotation.gtf"}
+    if (genome=='hg38') {genome.loc <- "/users/tgraf/agomez/Genomes/hg38_STAR"; annot <- "/users/tgraf/marvila/Genomes/gencode.v28.annotation.gtf"}
+    
+    
+    
+    
+    
   }
 
   
