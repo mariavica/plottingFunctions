@@ -203,7 +203,7 @@ selectAB <- function (x.list, ref.at) {
 
 GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize = NA,
                       maxGSSize = NA, colnames = NA, cutoff.top=NA, cutoff.dw=NA,
-                      simplify.cutoff = NA, labels_col=unique(cluster)) {
+                      simplify.cutoff = NA, labels_col=unique(cluster), fdr.cutoff = 1) {
   
   if (!requireNamespace("clusterProfiler", quietly = TRUE)) {
     stop("Package \"clusterProfiler\" needed for this function to work. Please install it.",
@@ -216,10 +216,10 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
   
   #organism="human"
   
- # if (organism=="human") { require(org.Hs.eg.db); organism<-org.Hs.eg.db }
- # if (organism=="mouse") { require(org.Mm.eg.db); organism<-org.Mm.eg.db }
+  if (organism=="human") { require(org.Hs.eg.db); organism<-org.Hs.eg.db }
+  if (organism=="mouse") { require(org.Mm.eg.db); organism<-org.Mm.eg.db }
   
-  require(org.Hs.eg.db); organism<-org.Hs.eg.db
+  #require(org.Hs.eg.db); organism<-org.Hs.eg.db
   
   if (is.list(genes)) {
  
@@ -230,7 +230,7 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
   #get all possible GO terms
   results <- enrichGO(gene         = as.character(genes),
                       OrgDb         = organism,
-                      keytype       = 'SYMBOL',
+                      keyType       = 'SYMBOL',
                       ont           = "BP",
                       pAdjustMethod = "BH",
                       minGSSize = minGSSize,
@@ -255,7 +255,7 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
     
     results <- enrichGO(gene         = as.character(genes)[which(cluster==i)],
                         OrgDb         = organism,
-                        keytype       = 'SYMBOL',
+                        keyType       = 'SYMBOL',
                         ont           = "BP",
                         pAdjustMethod = "BH",
                         minGSSize = minGSSize,
@@ -277,7 +277,7 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
   #print if needed
   if (plot) {
     
-    sel <- which(apply(mat.padjust,1,min)<0.05)
+    sel <- which(apply(mat.padjust,1,min)<fdr.cutoff)
     
     toplot <- -log10(mat.padjust[sel,])
     
@@ -322,10 +322,6 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
   
 }
 
-
-
-x <- matrix(rnorm(10), ncol=5, nrow=2)
-groups <- c(1,1,2,2,2)
 
 
 
@@ -605,6 +601,10 @@ names=( )
 
 todownload=${ids[$SGE_TASK_ID-1]}
 describer=${names[$SGE_TASK_ID-1]}
+
+module use /software/as/el7.2/EasyBuild/CRG/modules/all
+module load Python/2.7.11-foss-2016a
+
 ")
 
   if (genome=='mm10') loc.genome <- "/users/tgraf/marvila/Genomes/mm10/Bowtie_index/mm10"
@@ -614,9 +614,6 @@ describer=${names[$SGE_TASK_ID-1]}
   ### download data if GEO
   if (loc=='geo') {
     cat("
-module use /software/as/el7.2/EasyBuild/CRG/modules/all
-module load Python/2.7.11-foss-2016a
-
 /software/tgraf/sratoolkit.2.8.2-ubuntu64/bin/fastq-dump.2.8.2 --split-3 $todownload
 ")
 
@@ -803,8 +800,8 @@ rm ${describer}_R2.sam
     if (genome=='hg38') {genome.loc <- "/users/tgraf/agomez/Genomes/hg38_STAR";
       annot <- "/users/tgraf/marvila/Genomes/gencode.v28.annotation.gtf"
       eff.genom <- '2750570000'}
-    if (genome=='hg19') genome.loc <- "/users/tgraf/agomez/Genomes/hg19_STAR"
-      eff.genom <- '2750570000'
+    if (genome=='hg19') {genome.loc <- "/users/tgraf/agomez/Genomes/hg19_STAR";
+      eff.genom <- '2750570000'}
     
     if (sequencing=='single') {
       cat(paste("

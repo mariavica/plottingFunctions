@@ -2,9 +2,9 @@ Package: plottingFunctions
 Type: Package
 Title: What the package does (short line)
 Version: 0.1
-Date: 2018-12-12
+Date: 2019-10-30
 Author: Maria Vila Casadesus
 Maintainer: Maria Vila Casadesus <maria.vila@crg.eu>
 Description: More about what it does (maybe more than one line)
-Suggests: clusterProfiler
+Depends: clusterProfiler, pheatmap
 License: GPL-3

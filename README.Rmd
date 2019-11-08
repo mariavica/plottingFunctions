@@ -13,7 +13,7 @@ output:
 
 The package can be installed via github:
 
-```{r}
+```{r, message=FALSE}
 library(devtools)
 if(!require(plottingFunctions)) {
   devtools::install_github("mariavica/plottingFunctions", ref="master", build_vignettes = FALSE)
@@ -49,6 +49,18 @@ map.plot(ref=ref,map=map, expand=5, show.orig = TRUE)
 
 ## plotTwoTrends
 
+This function plots two trends in the same plot.
+
+```{r}
+
+a <- matrix(rnorm(1000), ncol=10, nrow=100)
+b <- matrix(rnorm(1000, mean = 1, sd = 0.5), ncol=10, nrow=100)
+
+plotTwoTrends(x1=a, x2=b, name.1='a', name.2 ='b', fix.ylim=c(-3,3))
+
+```
+
+
 
 ## selectAB
 
@@ -70,16 +82,32 @@ get.chr(c('a-b-c-d'), sep='-', pos=2)
 ## GOheatmap
 
 
-```{r}
+```{r, message=FALSE}
 
 genes <-list( a=c('Fgfr3'), b=c('Dyrk1a','Ctcf'))
 
 genes <-c('Fgfr3','Dyrk1a','Ctcf')
 cluster <- c(1,2,2)
 
-GOheatmap(genes=genes , cluster=cluster, organism="mouse")
+results <- GOheatmap(genes=genes , cluster=cluster, organism="mouse", fdr.cutoff = 0.05)
 
 ```
+
+
+
+
+## printScript
+
+
+```{r}
+
+printScript ( x = NULL, type='RNAseq' , genome='mm10' , sequencing = 'single' , loc ='geo' ,
+  cores = 8 , mem = '70G' , file = NULL)
+
+```
+
+
+
 
 
 
