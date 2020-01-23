@@ -1,0 +1,5 @@
+CHANGES IN VERSION 0.2
+------------------------
+
+    o Functions availabe with manual: plotTwoTrends, printScript, writeGsea
+    o File NEWS included

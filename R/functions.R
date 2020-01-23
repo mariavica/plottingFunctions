@@ -545,14 +545,56 @@ plotTwoTrends <- function(x1, x2, x = NA,
 
   legend(pos.leg, c(name.1,name.2), col=c(col1,col2), lwd=2, bty = "n")
   
-  
-  
-  
+
 }
 
 
+
+writeGsea <- function (x, cath, filename) {
+
+  # gmt
+  sink(file=paste(filename,"_head.gmt",sep=''))
+  cat('#1.2\n')
+  cat(paste(nrow(x),"\t",ncol(x),'\n',sep=''))
+  sink()
+
+  x.p<-data.frame(NAME=rownames(x),Description=rownames(x),x)
+  write.table(x.p,paste(filename,"_body.gmt",sep=''),quote=FALSE,row.names=FALSE)
+  
+  system(paste('cat ',filename,'_head.gmt ',filename,"_body.gmt > ",filename,'.gmt',sep=''))
+  system(paste('rm ',filename,'_head.gmt',sep=''))
+  system(paste('rm ',filename,'_body.gmt',sep=''))
+  
+  #* cls
+  
+  if (length(cath)==1) {
+    
+    ### cls is the parameter you've entered (numerical category)
+    sink(paste(filename,".cls",sep=''))
+    cat("#numeric\n")
+    cat(paste('#',cath,'\n',sep=''))
+    cat(unlist(x[cath,]))
+    sink()
+
+  } else {
+ 
+    ## cls is a factor category
+
+  }
+
+}
+
+
+jaja <- matrix(1:10,ncol=2,nrow=5)
+rownames(jaja)<-letters[1:5]
+colnames(jaja)<-LETTERS[1:2]
+
+write.gsea(jaja,cath='a',filename = "juju")
+
+
+
 printScript <- function (x=NULL, type, genome='mm10', sequencing='single', cores=8, loc='geo',
-                         mem='70G', queue='short', file=NULL) {
+                         mem='70G', queue='short', file=NULL, timing=NULL) {
   
   # type: one of
   # genome: alignment wanted
