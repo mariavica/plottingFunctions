@@ -62,7 +62,34 @@ plotTwoTrends(x1=a, x2=b, name.1='a', name.2 ='b', fix.ylim=c(-3,3))
 
 
 
+## plotTwoSamples
+
+This function plots two samples in the same plot.
+
+```{r}
+
+a <- matrix(rnorm(1000), ncol=10, nrow=100)
+b <- matrix(rnorm(1000, mean = 1, sd = 0.5), ncol=10, nrow=100)
+
+plotTwoSamples(x,y,xlab="A",ylab="B")
+
+```
+
+
+
+
 ## selectAB
+
+Select the appropiate Vector on the HiC analysis.
+
+
+
+```{r}
+#juju
+
+```
+
+
 
 
 ## correctAB
@@ -92,22 +119,5 @@ cluster <- c(1,2,2)
 results <- GOheatmap(genes=genes , cluster=cluster, organism="mouse", fdr.cutoff = 0.05)
 
 ```
-
-
-
-
-## printScript
-
-
-```{r}
-
-printScript ( x = NULL, type='RNAseq' , genome='mm10' , sequencing = 'single' , loc ='geo' ,
-  cores = 8 , mem = '70G' , file = NULL)
-
-```
-
-
-
-
 
 

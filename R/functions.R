@@ -230,7 +230,7 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
   #get all possible GO terms
   results <- enrichGO(gene         = as.character(genes),
                       OrgDb         = organism,
-                      keyType       = 'SYMBOL',
+                      keytype       = 'SYMBOL',
                       ont           = "BP",
                       pAdjustMethod = "BH",
                       minGSSize = minGSSize,
@@ -255,7 +255,7 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
     
     results <- enrichGO(gene         = as.character(genes)[which(cluster==i)],
                         OrgDb         = organism,
-                        keyType       = 'SYMBOL',
+                        keytype       = 'SYMBOL',
                         ont           = "BP",
                         pAdjustMethod = "BH",
                         minGSSize = minGSSize,
@@ -321,6 +321,14 @@ GOheatmap <- function(genes, cluster=NA, plot=TRUE, organism="mouse", minGSSize 
   
   
 }
+
+
+
+
+
+
+
+
 
 
 
@@ -583,6 +591,49 @@ writeGsea <- function (x, cath, filename) {
   }
 
 }
+
+
+
+batchCorrect <- function (x, batch) {
+  
+  require(sva)
+  y <- ComBat(x, batch=factor(batch))
+  return(y)
+  
+}
+
+
+
+
+
+
+
+plotTwoSamples <- function (x, y, xlab, ylab) {
+  
+  log2fc <- x-y
+  sel <- which(log2fc < 1 & log2fc > (-1))
+  plot(x[sel], y[sel], pch=19, cex=0.4, xlim=c(0,20),ylim=c(0,20), xlab=xlab, ylab=ylab, col=rgb(0.2,0.2,0.2,alpha=0.3), main=paste("Cor:",round(cor(x, y),3)))
+  abline(0,1);abline(1,1);abline(-1,1)
+  sel <- which(log2fc >= 1 )
+  points(x[sel], y[sel], pch=19, cex=0.4, col=rgb(1,0,0,alpha=0.3))
+  sel <- which(log2fc <= (-1))
+  points(x[sel], y[sel], pch=19, cex=0.4, col=rgb(0,1,0,alpha=0.3))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #jaja <- matrix(1:10,ncol=2,nrow=5)
