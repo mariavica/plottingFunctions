@@ -71,7 +71,7 @@ This function plots two samples in the same plot.
 a <- matrix(rnorm(1000), ncol=10, nrow=100)
 b <- matrix(rnorm(1000, mean = 1, sd = 0.5), ncol=10, nrow=100)
 
-plotTwoSamples(x,y,xlab="A",ylab="B")
+plotTwoSamples(a,b,xlab="A",ylab="B")
 
 ```
 
@@ -82,10 +82,27 @@ plotTwoSamples(x,y,xlab="A",ylab="B")
 
 Select the appropiate Vector on the HiC analysis.
 
-
+! The function will use the combination of chr:start:end as rownames to make sure that we're comparing the same regions. So the resolution of both matrices should be the same.
 
 ```{r}
-#juju
+set.seed(12345)
+hicpca <- data.frame(chr=c("chr1","chr1","chr1","chr1","chr1","chr2","chr2","chr2","chr2"),
+                    start=c(0,10000,20000,30000,40000,0,10000,20000,30000),
+                    end=c(9999,19999,29999,39999,49999,9999,19999,29999,39999),
+                    PC1=rnorm(9),
+                    PC2=rnorm(9,sd=2))
+hicpca <- list(hicpca)  #input must be a list
+
+at_content <- data.frame(chr=c("chr1","chr1","chr1","chr1","chr1","chr2","chr2","chr2","chr2"),
+                    start=c(0,10000,20000,30000,40000,0,10000,20000,30000),
+                    end=c(9999,19999,29999,39999,49999,9999,19999,29999,39999),
+                    at=runif(9,min = 0,max = 1))
+hicpca
+at_content
+
+finpca<-selectAB(x.list=hicpca, ref.at=at_content) 
+
+finpca
 
 ```
 
@@ -116,7 +133,7 @@ genes <-list( a=c('Fgfr3'), b=c('Dyrk1a','Ctcf'))
 genes <-c('Fgfr3','Dyrk1a','Ctcf')
 cluster <- c(1,2,2)
 
-results <- GOheatmap(genes=genes , cluster=cluster, organism="mouse", fdr.cutoff = 0.05)
+#results <- GOheatmap(genes=genes , cluster=cluster, organism="mouse", fdr.cutoff = 0.05)
 
 ```
 

@@ -1,5 +1,11 @@
+CHANGES IN VERSION 0.3
+------------------------
+
+    o selectAB function described in the README.
+    o plotTwoSamples function added.
+
 CHANGES IN VERSION 0.2
 ------------------------
 
-    o Functions availabe with manual: plotTwoTrends, printScript, writeGsea
-    o File NEWS included
+    o Functions availabe with manual: plotTwoTrends, writeGsea.
+    o File NEWS included.

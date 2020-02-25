@@ -1,8 +1,8 @@
 Package: plottingFunctions
 Type: Package
 Title: What the package does (short line)
-Version: 0.2
-Date: 2020-01-23
+Version: 0.3
+Date: 2020-02-25
 Author: Maria Vila Casadesus
 Maintainer: Maria Vila Casadesus <maria.vila@crg.eu>
 Description: More about what it does (maybe more than one line)

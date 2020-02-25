@@ -608,11 +608,11 @@ batchCorrect <- function (x, batch) {
 
 
 
-plotTwoSamples <- function (x, y, xlab, ylab) {
+plotTwoSamples <- function (x, y, xlab, ylab, minx=min(x), miny=min(y), maxx = max(x), maxy = max(y)) {
   
   log2fc <- x-y
   sel <- which(log2fc < 1 & log2fc > (-1))
-  plot(x[sel], y[sel], pch=19, cex=0.4, xlim=c(0,20),ylim=c(0,20), xlab=xlab, ylab=ylab, col=rgb(0.2,0.2,0.2,alpha=0.3), main=paste("Cor:",round(cor(x, y),3)))
+  plot(x[sel], y[sel], pch=19, cex=0.4, xlim=c(minx,maxx),ylim=c(miny,maxy), xlab=xlab, ylab=ylab, col=rgb(0.2,0.2,0.2,alpha=0.3), main=paste("Cor:",round(cor(unlist(x),unlist(y)),3)))
   abline(0,1);abline(1,1);abline(-1,1)
   sel <- which(log2fc >= 1 )
   points(x[sel], y[sel], pch=19, cex=0.4, col=rgb(1,0,0,alpha=0.3))
